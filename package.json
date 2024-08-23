@@ -1,0 +1,51 @@
+{
+  "name": "simple-browser",
+  "version": "0.1.0",
+  "private": true,
+  "main": "public/electron.js",
+  "dependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^13.4.0",
+    "@testing-library/user-event": "^13.5.0",
+    "electron-reload": "^2.0.0-alpha.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-native": "^0.75.1",
+    "react-native-web": "^0.19.12",
+    "react-native-webview": "^13.10.5",
+    "react-scripts": "5.0.1",
+    "web-vitals": "^2.1.4"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "react-scripts start",
+    "electron": "ts-node ./node_modules/electron/cli.js",
+    "electron-dev": "env ELECTRON_START_URL=http://localhost:3000 electron .",
+    "electron-pack": "npm run build && electron ."
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "electron": "^31.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "<5.2.0"
+  }
+}
