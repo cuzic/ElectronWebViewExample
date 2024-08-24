@@ -14,4 +14,5 @@ interface HTMLWebViewElement extends HTMLElement {
     options?: boolean | AddEventListenerOptions
   ) => void;
   openDevTools(): void;
+  getWebContentsId(): number;
 }
