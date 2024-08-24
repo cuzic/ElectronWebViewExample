@@ -17,12 +17,12 @@ interface ResponseData {
 
 class WebViewHandler {
   private functions: Functions;
-  private webref: RefObject<HTMLWebViewElement>;
+  private webview: HTMLWebViewElement;
   private pendingPromises: Record<string, PendingPromise> = {};
 
-  constructor(functions: Functions, webref: RefObject<HTMLWebViewElement>) {
+  constructor(functions: Functions, webview: HTMLWebViewElement) {
     this.functions = functions;
-    this.webref = webref;
+    this.webview = webview;
   }
 
   private generateID(): string {
@@ -41,7 +41,7 @@ class WebViewHandler {
 
   private sendMessageToWebView(message: object): void {
     const script = this.createMessageScript(message);
-    this.webref.current?.executeJavaScript(script);
+    this.webview.executeJavaScript(script);
   }
 
   handleRequest(data: { id: string, name: string, args: any[] }): void {
