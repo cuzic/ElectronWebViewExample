@@ -1,6 +1,12 @@
 const pendingPromises = {};
 
-window.ipcRenderer.send("message-from-webview", "Hello from WebView");
+window.electron.callNodejs("hello")
+  .then( ({ message }) => {
+    console.log(`message: ${message}`);
+  })
+  .catch( (response) => {
+    console.error(response);
+  });
 
 function log(message) {
   window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'log', message }));
@@ -79,5 +85,4 @@ function handleReactNativeMessage(event) {
     log('Error: ' + e.message);
   }
 }
-
 
