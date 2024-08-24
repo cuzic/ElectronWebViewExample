@@ -11,7 +11,8 @@ const App: React.FC = () => {
     goBack: () => {},
     goForward: () => {},
     reload: () => {},
-    navigate: () => {}
+    navigate: () => {},
+    callGuest: () => {}
   });
 
   const fs = window.fs;
@@ -19,7 +20,7 @@ const App: React.FC = () => {
     if (!fs) return;
 
     const asyncFn = async () => {
-      const preloadjs = await fs.toFileUrl("src/preload.js");
+      const preloadjs = await fs.toFileUrl("src/preload-guest.js");
       setPreloadPath(preloadjs);
     }
     asyncFn();
@@ -36,7 +37,7 @@ const App: React.FC = () => {
 
     if (isValidUrlFormat(url)) {
       try {
-        const webViewHandler = new WebViewHandler({}, webviewRef);
+        const webViewHandler = new WebViewHandler({}, webview);
         const validUrl = new URL(url);
 
         webview.src = validUrl.toString();
@@ -90,11 +91,17 @@ const App: React.FC = () => {
       },
       navigate: () => {
         setUrl(url); // setUrl関数が別途定義されていることを前提としています
+      },
+      callGuest: () => {
+        console.log("callGuest called");
+        window.electron.callGuest(webview.getWebContentsId(), "hello")
+          .then((response) => console.log(`response: ${response}`))
+          .catch((response) => console.error(response));
       }
     };
 
     setEventHandlers(handlers);
-  }, [webviewRef, url]);
+  }, [url, webviewRef, preloadPath]);
 
   useEffect(() => {
     const webview = webviewRef.current;
@@ -120,6 +127,7 @@ const App: React.FC = () => {
     inject();
 
     webview.addEventListener('dom-ready', () => {
+      console.log(`guest WebContents Id: ${webview.getWebContentsId()}`);
       webview.openDevTools();
     });
   }, [preloadPath, fs, webviewRef]);
@@ -139,6 +147,9 @@ const App: React.FC = () => {
         </Pressable>
         <Pressable style={styles.button} onPress={eventHandlers.reload}>
           <Text>🔄</Text>
+        </Pressable>
+        <Pressable style={styles.button} onPress={eventHandlers.callGuest}>
+          <Text>//</Text>
         </Pressable>
         <TextInput
           style={styles.urlInput}
