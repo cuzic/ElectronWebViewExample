@@ -12,12 +12,67 @@ contextBridge.exposeInMainWorld('fs', {
 
 // ipcRendererを使用して、メインプロセスとの通信を行う関数を提供
 contextBridge.exposeInMainWorld('ipcRenderer', {
-  send: (channel, data) => ipcRenderer.send(channel, data),
+  send: (channel, data) => {
+    ipcRenderer.send(channel, data)
+  },
+
   on: (channel, func) => {
-    const validChannels = ['fromMain'];
+    const validChannels = ['guest-request'];
     if (validChannels.includes(channel)) {
-      // Strip event as it includes `sender` (webContents) and is not JSON serializable
-      ipcRenderer.on(channel, (event, ...args) => func(...args));
+      ipcRenderer.on(channel, func);
+    } else {
+      throw new Error(`Channel ${channel} is not allowed.`);
+    }
+  },
+
+  invoke: (channel, data) => {
+    const validChannels = ['guest-request'];
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, data);
+    } else {
+      return Promise.reject(new Error(`Channel ${channel} is not allowed.`));
     }
   }
 });
+
+// このフレームワーク内の独自の関数は 互換性を意識して、ReactNativeWebView オブジェクトに置く
+//
+function generateRandomString() {
+  return Math.random().toString(36).substr(2, 9);
+};
+
+contextBridge.exposeInMainWorld('electron', {
+  callNodejs: (funcName, args = []) => {
+    const channel = "nodejs-request";
+    return new Promise((resolve, reject) => {
+      const randomString = generateRandomString();
+      const responseChannel = `${channel}-${randomString}`
+
+      const request = {
+        function: funcName,
+        args: args,
+        responseChannel
+      };
+
+      ipcRenderer.send(channel, request);
+
+      ipcRenderer.once(responseChannel, (event, response) => {
+        if (response.status === 'success') {
+          resolve(response.message);
+        } else {
+          reject(new Error(response.message));
+        }
+      });
+    });
+  },
+  callGuest: (guestWebContentsId, funcName, args = []) => {
+    const request = {
+      guestWebContentsId,
+      function: funcName,
+      args: args
+    };
+    console.log(request);
+    return ipcRenderer.invoke('guest-request', request);
+  },
+});
+
